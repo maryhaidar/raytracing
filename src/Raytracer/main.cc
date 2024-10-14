@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
                     // diffuse
                     auto albedo = colour::random() * colour::random();
                     sphere_material = make_shared<lambertian>(albedo, 0.5);
-                    auto centre2 = centre + vec3(0, random_double(0,.5), 0);
+                    auto centre2 = centre + vec3(0, random_double(0,.5) + 0.5*sin(centre.x() * pi), 0); 
                     world.add(make_shared<sphere>(centre, centre2, 0.2, sphere_material));
                 } else if (choose_mat < 0.95) {
                     // metal
@@ -65,6 +65,9 @@ int main(int argc, char* argv[]) {
 
     cam.defocus_angle = 0.6;
     cam.focus_dist    = 13.0;
+    cam.shutter_speed = 1.0 / 2.0;
+    cam.total_frames = 24;
+    cam.fps = 24;
 
     cam.render(world, argc, argv);
 }

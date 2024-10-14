@@ -1,7 +1,6 @@
 #ifndef BMPWRITER_H
 #define BMPWRITER_H
 
-#include <fstream>
 #include "colour.h"
 
 const int BYTES_PER_PIXEL = 3;
@@ -10,13 +9,17 @@ const int INFO_HEADER_SIZE = 40;
 unsigned char* create_bmp_file_header(int height, int stride);
 unsigned char* create_bmp_info_header(int height, int width);
 
-void write_bmp(int argc, char* argv[], int image_width, int image_height, colour** pixel_data) {
+void write_bmp(int argc, char* argv[], int image_width, int image_height, colour** pixel_data, int frame) {
     // Default file name
-    std::string filename = "image.bmp";
+    std::string filename = "image";
 
     if (argc > 1) {
         filename = argv[1];
     }
+
+    std::stringstream ss;
+    ss << filename << "_" << std::setw(4) << std::setfill('0') << frame + 1 << ".bmp";
+    filename = ss.str();
 
     int width_in_bytes = image_width * BYTES_PER_PIXEL;
     unsigned char padding[3] = {0, 0, 0};

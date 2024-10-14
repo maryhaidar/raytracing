@@ -17,8 +17,11 @@ class camera {
         vec3 lookdir = vec3(0, 0, -1);      // Direction camera is looking into
         vec3 vup        = vec3(0,1,0);      // Camera-relative "up" direction
 
-        double defocus_angle = 0;   // Variation angle of rays through each pixel
-        double focus_dist = 10;     // Distance from camera lookfrom point to plane of perfect focus
+        double defocus_angle = 0;           // Variation angle of rays through each pixel
+        double focus_dist = 10;             // Distance from camera lookfrom point to plane of perfect focus
+        double shutter_speed = 1.0 / 60.0;  // Length of time camera shutter remains open
+        int total_frames = 100;             // Total number of frames to be rendered
+        int fps = 24;                       // Number of frames per second
 
         void render(const hittable& world, int argc, char* argv[]) {
             initialise();
@@ -26,25 +29,36 @@ class camera {
             // Allocate memory for the 2D pixel data array.
             colour** pixel_data = new colour*[image_height];
             for (int j = 0; j < image_height; j++) {
-                std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
                 pixel_data[j] = new colour[image_width];
-                for (int i = 0; i < image_width; i++) {
-                    colour pixel_colour(0,0,0);
-                    for (int sample = 0; sample < samples_per_pixel; sample++) {
-                        ray r = get_ray(i, j);
-                        pixel_colour += ray_colour(r, max_depth, world);
-                    }
-                    pixel_data[j][i] = pixel_samples_scale * pixel_colour;
-                }
             }
 
-            write_bmp(argc, argv, image_width, image_height, pixel_data);
+            double frame_duration = 1.0 / fps;
 
+            for (int frame = 0; frame < total_frames; frame++) {
+                double frame_time = frame * frame_duration;
+
+                for (int j = 0; j < image_height; j++) {
+                    std::clog << "\rFrame " << frame + 1 << "/" << total_frames 
+                              << " scanlines remaining: " << (image_height - j) << ' ' << std::flush;
+                    for (int i = 0; i < image_width; i++) {
+                        colour pixel_colour(0,0,0);
+                        for (int sample = 0; sample < samples_per_pixel; sample++) {
+                            ray r = get_ray(i, j, frame_time);
+                            pixel_colour += ray_colour(r, max_depth, world);
+                        }
+                        pixel_data[j][i] = pixel_samples_scale * pixel_colour;
+                    }
+                }
+                write_bmp(argc, argv, image_width, image_height, pixel_data, frame);
+            }
+
+            // Deallocate memory for the pixel_data array once rendering is complete.
             for (int j = 0; j < image_height; j++) {
-                    delete[] pixel_data[j];
+                delete[] pixel_data[j];
             }
             delete[] pixel_data;
-            std::clog << "\rDone                \n";
+
+            std::clog << "\rDone                                                  \n";
         }
 
     private:
@@ -95,7 +109,7 @@ class camera {
             defocus_disk_v = v * defocus_radius;
         }
 
-        ray get_ray(int i, int j) const {
+        ray get_ray(int i, int j, double frame_time) const {
             // Construct a camera ray originating from the defocus disk and directed at randomly
             // sampled point around the pixel location i, j.
 
@@ -106,7 +120,14 @@ class camera {
             
             auto ray_origin = (defocus_angle <= 0) ? centre : defocus_disk_sample();
             auto ray_direction = pixel_sample - ray_origin;
-            auto ray_time = random_double();
+
+            // Calculate shutter open and close times
+            double shutter_open_time = frame_time;
+            double shutter_close_time = frame_time + shutter_speed;
+
+            // Generate ray time within shutter interval
+            double ray_time = shutter_open_time + random_double() 
+                            * (shutter_close_time - shutter_open_time);
 
             return ray(ray_origin, ray_direction, ray_time);
         }
