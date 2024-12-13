@@ -34,6 +34,10 @@ class vec3 {
             return *this *= 1/t;
         }
 
+        bool operator!=(const vec3 &other) const {
+            return (e[0] != other.e[0]) || (e[1] != other.e[1]) || (e[2] != other.e[2]);
+        }
+
         double length() const {
             return std::sqrt(length_squared());
         }

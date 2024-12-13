@@ -29,6 +29,7 @@ set ( SOURCE_RAYTRACER
   src/Raytracer/ray.h
   src/Raytracer/rtutility.h
   src/Raytracer/sphere.h
+  src/Raytracer/transform.h
   src/Raytracer/vec3.h
 )
 
