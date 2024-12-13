@@ -1,3 +1,6 @@
+
+![raytracing_motion_blur](https://github.com/user-attachments/assets/4364f313-129c-4755-a01c-6174720c0e2f)
+
 Raytracing project based on the "Ray Tracing in One Weekend" series:
 
 Title (series): “Ray Tracing in One Weekend Series”
@@ -32,11 +35,11 @@ You can run the program on Windows by either executing the binaries in the build
 
 ```shell
 build\Debug > .\Raytracer.exe # Will generate an image named `image.bmp`
-build\Debug > .\Raytracer.exe my_filename.bmp # File name override
+build\Debug > .\Raytracer.exe my_filename # File name override
 ```
 Or by running the optimised version:
 
 ```shell
 build\Release > .\Raytracer.exe
-build\Release > .\Raytracer.exe my_filename.bmp
+build\Release > .\Raytracer.exe my_filename
 ```
