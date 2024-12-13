@@ -7,15 +7,14 @@ class sphere : public hittable {
     public:
         // Stationary sphere
         sphere(const point3& static_centre, double radius, shared_ptr<material> mat)
-          : centre(static_centre, vec3(0,0,0)), radius(std::fmax(0,radius)), mat(mat) {}
+          : transform(animated_transform(static_centre, static_centre, 0, 0)), radius(std::fmax(0,radius)), mat(mat) {}
 
         // Moving sphere
-        sphere(const point3& centre1, const point3& centre2, double radius, 
-               shared_ptr<material> mat)
-          : centre(centre1, centre2 - centre1), radius(std::fmax(0,radius)), mat(mat) {}
+        sphere(const animated_transform& transform, double radius, shared_ptr<material> mat)
+          : transform(transform), radius(std::fmax(0, radius)), mat(mat) {}
 
         bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
-            point3 current_centre = centre.at(r.time());
+            point3 current_centre = transform.apply_inverse(r.origin(), r.time());
             vec3 oc = current_centre - r.origin();
             auto a = r.direction().length_squared();
             auto h = dot(r.direction(), oc);
@@ -48,6 +47,7 @@ class sphere : public hittable {
             ray centre;
             double radius;
             shared_ptr<material> mat;
+            animated_transform transform;
 };
 
 #endif
